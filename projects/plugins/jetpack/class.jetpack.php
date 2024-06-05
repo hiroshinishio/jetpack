@@ -139,6 +139,7 @@ class Jetpack {
 		'milestone-widget',
 		'subscribe-modal-css',
 		'subscribe-overlay-css',
+		'subscribe-floating-button-css',
 	);
 
 	/**
