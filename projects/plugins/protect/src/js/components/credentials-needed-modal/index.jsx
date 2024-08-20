@@ -1,17 +1,19 @@
 import { Button, Text, getRedirectUrl } from '@automattic/jetpack-components';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useQueryClient } from '@tanstack/react-query';
+import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { useEffect } from 'react';
+import { QUERY_CREDENTIALS_KEY } from '../../data/constants';
+import useCredentialsQuery from '../../data/use-credentials-query';
 import { STORE_ID } from '../../state/store';
 import Notice from '../notice';
 import styles from './styles.module.scss';
 
 const CredentialsNeededModal = () => {
+	const queryClient = useQueryClient();
 	const { setModal } = useDispatch( STORE_ID );
+	const { data: credentials } = useCredentialsQuery();
 	const { siteSuffix, blogID } = window.jetpackProtectInitialState;
-
-	const { checkCredentials } = useDispatch( STORE_ID );
-	const credentials = useSelect( select => select( STORE_ID ).getCredentials() );
 
 	const handleCancelClick = () => {
 		return event => {
@@ -26,12 +28,12 @@ const CredentialsNeededModal = () => {
 	useEffect( () => {
 		const interval = setInterval( () => {
 			if ( ! credentials || credentials.length === 0 ) {
-				checkCredentials();
+				queryClient.invalidateQueries( { queryKey: [ QUERY_CREDENTIALS_KEY ] } );
 			}
-		}, 3000 );
+		}, 5_000 );
 
 		return () => clearInterval( interval );
-	}, [ checkCredentials, credentials ] );
+	}, [ queryClient, credentials ] );
 
 	return (
 		<>

@@ -1,9 +1,8 @@
 import { AdminSectionHero, Container, Col, H3, Text } from '@automattic/jetpack-components';
 import { useConnectionErrorNotice, ConnectionError } from '@automattic/jetpack-connection';
 import { Spinner } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
-import React, { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import inProgressImage from '../../../../assets/images/in-progress.png';
 import AdminPage from '../../components/admin-page';
 import ErrorScreen from '../../components/error-section';
@@ -12,17 +11,15 @@ import ScanFooter from '../../components/scan-footer';
 import SeventyFiveLayout from '../../components/seventy-five-layout';
 import Summary from '../../components/summary';
 import ThreatsList from '../../components/threats-list';
-import { SCAN_STATUS_UNAVAILABLE } from '../../constants';
+import { SCAN_IN_PROGRESS_STATUSES } from '../../constants';
+import useScanStatusQuery from '../../data/use-scan-status-query';
 import useAnalyticsTracks from '../../hooks/use-analytics-tracks';
 import { OnboardingContext } from '../../hooks/use-onboarding';
 import useProtectData from '../../hooks/use-protect-data';
 import useWafData from '../../hooks/use-waf-data';
-import { STORE_ID } from '../../state/store';
 import onboardingSteps from './onboarding-steps';
 import ScanSectionHeader from './scan-section-header';
 import styles from './styles.module.scss';
-import useCredentials from './use-credentials';
-import useStatusPolling from './use-status-polling';
 
 const ConnectionErrorCol = () => {
 	const { hasConnectionError } = useConnectionErrorNotice();
@@ -154,19 +151,10 @@ const DefaultSection = () => {
 
 const ScanPage = () => {
 	const { lastChecked, hasRequiredPlan } = useProtectData();
-	const { refreshStatus } = useDispatch( STORE_ID );
-	const { scanInProgress, statusIsFetching, scanIsUnavailable, status, scanError } = useSelect(
-		select => ( {
-			scanError: select( STORE_ID ).scanError(),
-			scanInProgress: select( STORE_ID ).scanInProgress(),
-			scanIsUnavailable: select( STORE_ID ).getScanIsUnavailable(),
-			status: select( STORE_ID ).getStatus(),
-			statusIsFetching: select( STORE_ID ).getStatusIsFetching(),
-		} )
-	);
+	const { data: status } = useScanStatusQuery( { usePolling: true } );
 
 	let currentScanStatus;
-	if ( scanError ) {
+	if ( status.error ) {
 		currentScanStatus = 'error';
 	} else if ( ! lastChecked ) {
 		currentScanStatus = 'in_progress';
@@ -183,27 +171,23 @@ const ScanPage = () => {
 		},
 	} );
 
-	useStatusPolling();
-	useCredentials();
-
-	// retry fetching status if it is not available
-	useEffect( () => {
-		if ( ! statusIsFetching && SCAN_STATUS_UNAVAILABLE === status.status && ! scanIsUnavailable ) {
-			refreshStatus( true );
-		}
-	}, [ statusIsFetching, status.status, refreshStatus, scanIsUnavailable ] );
-
 	const renderSection = useMemo( () => {
-		if ( scanInProgress ) {
-			return <ScanningSection currentProgress={ status.currentProgress } />;
+		if ( SCAN_IN_PROGRESS_STATUSES.includes( status.status ) ) {
+			return <ScanningSection currentProgress={ status.current_progress } />;
 		}
 
-		if ( scanError ) {
-			return <ErrorSection errorMessage={ scanError.message } errorCode={ scanError.code } />;
+		if ( status.error ) {
+			return <ErrorSection errorMessage={ status.error_message } errorCode={ status.error_code } />;
 		}
 
 		return <DefaultSection />;
-	}, [ scanInProgress, status.currentProgress, scanError ] );
+	}, [
+		status.status,
+		status.error,
+		status.current_progress,
+		status.error_message,
+		status.error_code,
+	] );
 
 	return (
 		<OnboardingContext.Provider value={ onboardingSteps }>

@@ -1,7 +1,10 @@
-import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
+import camelize from 'camelize';
 import { useMemo } from 'react';
-import { STORE_ID } from '../../state/store';
+import usePlanQuery from '../../data/use-has-plan-query';
+import useHistoryQuery from '../../data/use-history-query';
+import useProductDataQuery from '../../data/use-product-data-query';
+import useScanStatusQuery from '../../data/use-scan-status-query';
 
 // Valid "key" values for filtering.
 const KEY_FILTERS = [ 'all', 'core', 'plugins', 'themes', 'files', 'database' ];
@@ -50,16 +53,14 @@ export default function useProtectData(
 		filter: { status: null, key: null },
 	}
 ) {
-	const { status, scanHistory, jetpackScan, hasRequiredPlan } = useSelect( select => ( {
-		status: select( STORE_ID ).getStatus(),
-		scanHistory: select( STORE_ID ).getScanHistory(),
-		jetpackScan: select( STORE_ID ).getJetpackScan(),
-		hasRequiredPlan: select( STORE_ID ).hasRequiredPlan(),
-	} ) );
+	const { data: status } = useScanStatusQuery();
+	const { data: scanHistory } = useHistoryQuery();
+	const { data: hasRequiredPlan } = usePlanQuery();
+	const { data: jetpackScan } = useProductDataQuery();
 
 	const { counts, results, error, lastChecked, hasUncheckedItems } = useMemo( () => {
 		// This hook can provide data from two sources: the current scan or the scan history.
-		const data = sourceType === 'history' ? { ...scanHistory } : { ...status };
+		const data = camelize( sourceType === 'history' ? { ...scanHistory } : { ...status } );
 
 		// Prepare the result object.
 		const result = {

@@ -1,26 +1,11 @@
 import { combineReducers } from '@wordpress/data';
-import camelize from 'camelize';
-import { SCAN_STATUS_OPTIMISTICALLY_SCANNING } from '../constants';
 import {
-	SET_CREDENTIALS_STATE,
-	SET_CREDENTIALS_STATE_IS_FETCHING,
-	SET_SCAN_HISTORY,
-	SET_STATUS,
-	SET_STATUS_PROGRESS,
-	START_SCAN_OPTIMISTICALLY,
-	SET_STATUS_IS_FETCHING,
-	SET_SCAN_IS_UNAVAILABLE,
-	SET_SCAN_IS_ENQUEUING,
 	SET_INSTALLED_PLUGINS,
 	SET_INSTALLED_THEMES,
 	SET_WP_VERSION,
-	SET_JETPACK_SCAN,
-	SET_THREAT_IS_UPDATING,
 	SET_MODAL,
 	SET_NOTICE,
 	CLEAR_NOTICE,
-	SET_THREATS_ARE_FIXING,
-	SET_HAS_REQUIRED_PLAN,
 	SET_ONBOARDING_PROGRESS,
 	SET_WAF_IS_SEEN,
 	SET_WAF_UPGRADE_IS_SEEN,
@@ -30,66 +15,6 @@ import {
 	SET_WAF_CONFIG,
 	SET_WAF_STATS,
 } from './actions';
-
-const credentials = ( state = null, action ) => {
-	switch ( action.type ) {
-		case SET_CREDENTIALS_STATE:
-			return action.credentials;
-	}
-	return state;
-};
-
-const credentialsIsFetching = ( state = false, action ) => {
-	switch ( action.type ) {
-		case SET_CREDENTIALS_STATE_IS_FETCHING:
-			return action.isFetching;
-	}
-	return state;
-};
-
-const scanHistory = ( state = {}, action ) => {
-	switch ( action.type ) {
-		case SET_SCAN_HISTORY:
-			return camelize( action.scanHistory );
-	}
-	return state;
-};
-
-const status = ( state = {}, action ) => {
-	switch ( action.type ) {
-		case SET_STATUS:
-			return action.status;
-		case SET_STATUS_PROGRESS:
-			return { ...state, currentProgress: action.currentProgress };
-		case START_SCAN_OPTIMISTICALLY:
-			return { ...state, currentProgress: 0, status: SCAN_STATUS_OPTIMISTICALLY_SCANNING };
-	}
-	return state;
-};
-
-const statusIsFetching = ( state = false, action ) => {
-	switch ( action.type ) {
-		case SET_STATUS_IS_FETCHING:
-			return action.status;
-	}
-	return state;
-};
-
-const scanIsUnavailable = ( state = false, action ) => {
-	switch ( action.type ) {
-		case SET_SCAN_IS_UNAVAILABLE:
-			return action.status;
-	}
-	return state;
-};
-
-const scanIsEnqueuing = ( state = false, action ) => {
-	switch ( action.type ) {
-		case SET_SCAN_IS_ENQUEUING:
-			return action.isEnqueuing;
-	}
-	return state;
-};
 
 const installedPlugins = ( state = {}, action ) => {
 	switch ( action.type ) {
@@ -115,30 +40,6 @@ const wpVersion = ( state = {}, action ) => {
 	return state;
 };
 
-const jetpackScan = ( state = {}, action ) => {
-	switch ( action.type ) {
-		case SET_JETPACK_SCAN:
-			return action.scan;
-	}
-	return state;
-};
-
-const threatsUpdating = ( state = {}, action ) => {
-	switch ( action.type ) {
-		case SET_THREAT_IS_UPDATING:
-			return { ...state, [ action.payload.threatId ]: action.payload.isUpdating };
-	}
-	return state;
-};
-
-const threatsAreFixing = ( state = [], action ) => {
-	switch ( action.type ) {
-		case SET_THREATS_ARE_FIXING:
-			return action.threatIds;
-	}
-	return state;
-};
-
 const modal = ( state = {}, action ) => {
 	switch ( action.type ) {
 		case SET_MODAL:
@@ -153,14 +54,6 @@ const notice = ( state = {}, action ) => {
 			return { ...state, ...action.payload };
 		case CLEAR_NOTICE:
 			return {};
-	}
-	return state;
-};
-
-const hasRequiredPlan = ( state = false, action ) => {
-	switch ( action.type ) {
-		case SET_HAS_REQUIRED_PLAN:
-			return action.hasRequiredPlan;
 	}
 	return state;
 };
@@ -205,22 +98,11 @@ const waf = ( state = defaultWaf, action ) => {
 };
 
 const reducers = combineReducers( {
-	credentials,
-	credentialsIsFetching,
-	scanHistory,
-	status,
-	statusIsFetching,
-	scanIsUnavailable,
-	scanIsEnqueuing,
 	installedPlugins,
 	installedThemes,
 	wpVersion,
-	jetpackScan,
-	threatsUpdating,
 	modal,
 	notice,
-	threatsAreFixing,
-	hasRequiredPlan,
 	onboardingProgress,
 	waf,
 } );

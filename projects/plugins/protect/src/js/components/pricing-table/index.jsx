@@ -10,13 +10,10 @@ import {
 	PricingTableItem,
 } from '@automattic/jetpack-components';
 import { useConnection } from '@automattic/jetpack-connection';
-import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import React, { useCallback, useState } from 'react';
 import useAnalyticsTracks from '../../hooks/use-analytics-tracks';
 import useProtectData from '../../hooks/use-protect-data';
-import useWafData from '../../hooks/use-waf-data';
-import { STORE_ID } from '../../state/store';
 
 /**
  * Product Detail component.
@@ -30,14 +27,11 @@ const ConnectedPricingTable = ( { onScanAdd } ) => {
 		skipUserConnection: true,
 	} );
 
-	const { refreshPlan, refreshStatus, startScanOptimistically } = useDispatch( STORE_ID );
-
 	const [ getProtectFreeButtonIsLoading, setGetProtectFreeButtonIsLoading ] = useState( false );
 	const [ getScanButtonIsLoading, setGetScanButtonIsLoading ] = useState( false );
 
 	// Access paid protect product data
 	const { jetpackScan } = useProtectData();
-	const { refreshWaf } = useWafData();
 	const { pricingForUi } = jetpackScan;
 	const { introductoryOffer, currencyCode: currency = 'USD' } = pricingForUi;
 
@@ -59,21 +53,10 @@ const ConnectedPricingTable = ( { onScanAdd } ) => {
 		setGetProtectFreeButtonIsLoading( true );
 		try {
 			await handleRegisterSite();
-			startScanOptimistically();
-			await refreshPlan();
-			await refreshWaf();
-			await refreshStatus( true );
 		} finally {
 			setGetProtectFreeButtonIsLoading( false );
 		}
-	}, [
-		handleRegisterSite,
-		recordEvent,
-		refreshWaf,
-		refreshPlan,
-		refreshStatus,
-		startScanOptimistically,
-	] );
+	}, [ handleRegisterSite, recordEvent ] );
 
 	const args = {
 		title: __( 'Stay one step ahead of threats', 'jetpack-protect' ),

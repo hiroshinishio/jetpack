@@ -1,17 +1,18 @@
 import { Button } from '@automattic/jetpack-components';
-import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import React, { forwardRef } from 'react';
-import { STORE_ID } from '../../state/store';
+import { SCAN_IN_PROGRESS_STATUSES } from '../../constants';
+import useScanStatusQuery from '../../data/use-scan-status-query';
+import useStartScanMutator from '../../data/use-start-scan-mutation';
 
 const ScanButton = forwardRef( ( { variant = 'secondary', children, ...props }, ref ) => {
-	const { scan } = useDispatch( STORE_ID );
-	const scanIsEnqueuing = useSelect( select => select( STORE_ID ).getScanIsEnqueuing(), [] );
+	const { data: status } = useScanStatusQuery();
+	const startScanMutation = useStartScanMutator();
 
 	const handleScanClick = () => {
 		return event => {
 			event.preventDefault();
-			scan();
+			startScanMutation.mutate();
 		};
 	};
 
@@ -19,7 +20,7 @@ const ScanButton = forwardRef( ( { variant = 'secondary', children, ...props }, 
 		<Button
 			ref={ ref }
 			variant={ variant }
-			isLoading={ scanIsEnqueuing }
+			isLoading={ SCAN_IN_PROGRESS_STATUSES.includes( status?.status ) }
 			onClick={ handleScanClick() }
 			{ ...props }
 		>

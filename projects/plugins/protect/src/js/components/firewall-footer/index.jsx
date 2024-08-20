@@ -74,7 +74,7 @@ const ShareDebugData = () => {
 					dismissable: true,
 					message: createInterpolateElement(
 						__(
-							'An error ocurred. Please try again or <supportLink>contact support</supportLink>.',
+							'An error occurred. Please try again or <supportLink>contact support</supportLink>.',
 							'jetpack-protect'
 						),
 						{
@@ -142,7 +142,7 @@ const ShareData = () => {
 					dismissable: true,
 					message: createInterpolateElement(
 						__(
-							'An error ocurred. Please try again or <supportLink>contact support</supportLink>.',
+							'An error occurred. Please try again or <supportLink>contact support</supportLink>.',
 							'jetpack-protect'
 						),
 						{

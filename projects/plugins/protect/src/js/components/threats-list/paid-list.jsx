@@ -1,8 +1,9 @@
 import { Text, Button, useBreakpointMatch } from '@automattic/jetpack-components';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 import React, { useCallback } from 'react';
 import useAnalyticsTracks from '../../hooks/use-analytics-tracks';
+import useFixers from '../../hooks/use-fixers';
 import { STORE_ID } from '../../state/store';
 import DiffViewer from '../diff-viewer';
 import MarkedLines from '../marked-lines';
@@ -29,11 +30,11 @@ const ThreatAccordionItem = ( {
 	status,
 	hideAutoFixColumn = false,
 } ) => {
-	const threatsAreFixing = useSelect( select => select( STORE_ID ).getThreatsAreFixing() );
 	const { setModal } = useDispatch( STORE_ID );
 	const { recordEvent } = useAnalyticsTracks();
 
-	const fixerInProgress = threatsAreFixing.indexOf( id ) >= 0;
+	const { fixersStatus } = useFixers();
+	const fixerInProgress = fixersStatus?.[ id ]?.status === 'in_progress';
 
 	const learnMoreButton = source ? (
 		<Button variant="link" isExternalLink={ true } weight="regular" href={ source }>

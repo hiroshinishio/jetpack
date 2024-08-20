@@ -1,16 +1,17 @@
 import { Button, getRedirectUrl, Text } from '@automattic/jetpack-components';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon } from '@wordpress/icons';
+import useIgnoreThreatMutation from '../../data/use-ignore-threat-mutation';
 import { STORE_ID } from '../../state/store';
 import ThreatSeverityBadge from '../severity';
 import UserConnectionGate from '../user-connection-gate';
 import styles from './styles.module.scss';
 
 const IgnoreThreatModal = ( { id, title, label, icon, severity } ) => {
-	const { setModal, ignoreThreat } = useDispatch( STORE_ID );
-	const threatsUpdating = useSelect( select => select( STORE_ID ).getThreatsUpdating() );
+	const { setModal } = useDispatch( STORE_ID );
+	const ignoreThreatMutation = useIgnoreThreatMutation();
 	const codeableURL = getRedirectUrl( 'jetpack-protect-codeable-referral' );
 
 	const handleCancelClick = () => {
@@ -23,9 +24,8 @@ const IgnoreThreatModal = ( { id, title, label, icon, severity } ) => {
 	const handleIgnoreClick = () => {
 		return async event => {
 			event.preventDefault();
-			ignoreThreat( id, () => {
-				setModal( { type: null } );
-			} );
+			await ignoreThreatMutation.mutateAsync( id );
+			setModal( { type: null } );
 		};
 	};
 
@@ -66,7 +66,7 @@ const IgnoreThreatModal = ( { id, title, label, icon, severity } ) => {
 				</Button>
 				<Button
 					isDestructive={ true }
-					isLoading={ Boolean( threatsUpdating && threatsUpdating[ id ] ) }
+					isLoading={ ignoreThreatMutation.isLoading }
 					onClick={ handleIgnoreClick() }
 				>
 					{ __( 'Ignore threat', 'jetpack-protect' ) }

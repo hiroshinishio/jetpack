@@ -1,16 +1,18 @@
 import { Button, Text } from '@automattic/jetpack-components';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Icon } from '@wordpress/icons';
+import useUnIgnoreThreatMutation from '../../data/use-unignore-threat-mutation';
+import useFixers from '../../hooks/use-fixers';
 import { STORE_ID } from '../../state/store';
 import ThreatSeverityBadge from '../severity';
 import UserConnectionGate from '../user-connection-gate';
 import styles from './styles.module.scss';
 
 const UnignoreThreatModal = ( { id, title, label, icon, severity } ) => {
-	const { setModal, unignoreThreat } = useDispatch( STORE_ID );
-	const threatsUpdating = useSelect( select => select( STORE_ID ).getThreatsUpdating() );
-
+	const { setModal } = useDispatch( STORE_ID );
+	const { fixersStatus } = useFixers();
+	const unignoreThreatMutation = useUnIgnoreThreatMutation();
 	const handleCancelClick = () => {
 		return event => {
 			event.preventDefault();
@@ -21,9 +23,8 @@ const UnignoreThreatModal = ( { id, title, label, icon, severity } ) => {
 	const handleUnignoreClick = () => {
 		return async event => {
 			event.preventDefault();
-			unignoreThreat( id, () => {
-				setModal( { type: null } );
-			} );
+			await unignoreThreatMutation.mutateAsync( id );
+			setModal( { type: null } );
 		};
 	};
 
@@ -53,7 +54,7 @@ const UnignoreThreatModal = ( { id, title, label, icon, severity } ) => {
 				</Button>
 				<Button
 					isDestructive={ true }
-					isLoading={ Boolean( threatsUpdating && threatsUpdating[ id ] ) }
+					isLoading={ Boolean( fixersStatus?.[ id ]?.status === 'in_progress' ) }
 					onClick={ handleUnignoreClick() }
 				>
 					{ __( 'Unignore threat', 'jetpack-protect' ) }

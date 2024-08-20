@@ -1,10 +1,10 @@
 import { AdminPage as JetpackAdminPage, Container } from '@automattic/jetpack-components';
 import { useProductCheckoutWorkflow } from '@automattic/jetpack-connection';
-import apiFetch from '@wordpress/api-fetch';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { addQueryArgs, getQueryArg } from '@wordpress/url';
-import React, { useEffect } from 'react';
+import { addQueryArgs } from '@wordpress/url';
+import React from 'react';
+import API from '../../api';
 import { JETPACK_SCAN_SLUG } from '../../constants';
 import useWafData from '../../hooks/use-waf-data';
 import { STORE_ID } from '../../state/store';
@@ -20,30 +20,13 @@ const AdminPage = ( { children } ) => {
 
 	const { isSeen: wafSeen } = useWafData();
 	const notice = useSelect( select => select( STORE_ID ).getNotice() );
-	const { refreshPlan, startScanOptimistically, refreshStatus, refreshScanHistory } =
-		useDispatch( STORE_ID );
 	const { adminUrl } = window.jetpackProtectInitialState || {};
 	const { run, isRegistered, hasCheckoutStarted } = useProductCheckoutWorkflow( {
 		productSlug: JETPACK_SCAN_SLUG,
 		redirectUrl: addQueryArgs( adminUrl, { checkPlan: true } ),
-		siteProductAvailabilityHandler: async () =>
-			apiFetch( {
-				path: 'jetpack-protect/v1/check-plan',
-				method: 'GET',
-			} ).then( hasRequiredPlan => hasRequiredPlan ),
+		siteProductAvailabilityHandler: API.checkPlan,
 		useBlogIdSuffix: true,
 	} );
-
-	useEffect( () => {
-		if ( getQueryArg( window.location.search, 'checkPlan' ) ) {
-			startScanOptimistically();
-			setTimeout( () => {
-				refreshPlan();
-				refreshStatus( true );
-				refreshScanHistory();
-			}, 5000 );
-		}
-	}, [ refreshPlan, refreshStatus, refreshScanHistory, startScanOptimistically ] );
 
 	/*
 	 * Show interstital page when

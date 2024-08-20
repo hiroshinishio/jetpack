@@ -19,6 +19,7 @@ use Automattic\Jetpack\Modules;
 use Automattic\Jetpack\My_Jetpack\Initializer as My_Jetpack_Initializer;
 use Automattic\Jetpack\My_Jetpack\Products as My_Jetpack_Products;
 use Automattic\Jetpack\Plugins_Installer;
+use Automattic\Jetpack\Protect\Credentials;
 use Automattic\Jetpack\Protect\Onboarding;
 use Automattic\Jetpack\Protect\REST_Controller;
 use Automattic\Jetpack\Protect\Scan_History;
@@ -213,6 +214,7 @@ class Jetpack_Protect {
 			'apiRoot'            => esc_url_raw( rest_url() ),
 			'apiNonce'           => wp_create_nonce( 'wp_rest' ),
 			'registrationNonce'  => wp_create_nonce( 'jetpack-registration-nonce' ),
+			'credentials'        => Credentials::get_credential_array(),
 			'status'             => Status::get_status( $refresh_status_from_wpcom ),
 			'scanHistory'        => Scan_History::get_scan_history( $refresh_status_from_wpcom ),
 			'installedPlugins'   => Plugins_Installer::get_plugins(),
